@@ -1,13 +1,12 @@
 import json
 import requests
-import re  # Import modul re untuk ekspresi reguler
+import re  
 
 def extract_ip_and_format(line):
-    """Ekstrak IP dan port dari berbagai format proxy dan kembalikan bersama format aslinya."""
     pattern = r'(?:http|socks4|socks5)://(?:\w*:?[\w]*@)?([\d\.]+:\d+)'
     match = re.search(pattern, line)
     if match:
-        return match.group(1), line.strip()  # Kembalikan IP:port dan format asli
+        return match.group(1), line.strip()  
     return None, None
 
 def read_proxy_file(filename):
@@ -17,7 +16,7 @@ def read_proxy_file(filename):
         for line in file:
             ip_port, original_format = extract_ip_and_format(line)
             if ip_port:
-                proxy_dict[ip_port] = original_format  # Simpan dengan kunci IP:port
+                proxy_dict[ip_port] = original_format  
     return proxy_dict
 
 def main():
@@ -53,20 +52,19 @@ def main():
 
     with open(output_file, 'w') as outfile:
         for device in devices:
-            #if device.get("is_proxy") is None:
             if device.get("final_score", 0) != 0:
-                ip = device.get("device_ip")
+                ip_prefix = ".".join(device.get("device_ip").split('.')[:1])  
                 ip_found = False
-                for ip_port in proxy_data.keys():
-                    if ip in ip_port:
-                        outfile.write(proxy_data[ip_port] + "\n")
-                        print(f"Format proxy untuk IP {ip} disimpan.")
+                for ip_port, original_format in proxy_data.items():
+                    proxy_ip_prefix = ".".join(ip_port.split(':')[0].split('.')[:1])  
+                    if ip_prefix == proxy_ip_prefix:
+                        outfile.write(original_format + "\n")  
+                        print(f"Format proxy untuk IP {device.get('device_ip')} disimpan.")
                         ip_found = True
                         break
-                if not ip_found:
-                    # Jika IP tidak ditemukan dalam proxy.txt, simpan saja IP-nya
-                    outfile.write(ip + "\n")
-                    print(f"IP {ip} disimpan karena tidak ditemukan dalam proxy.txt.")
+                #if not ip_found:
+                    #outfile.write(device.get("device_ip") + "\n")
+                    #print(f"IP {device.get('device_ip')} disimpan karena tidak ditemukan dalam proxy.txt.")
 
 if __name__ == "__main__":
     main()
