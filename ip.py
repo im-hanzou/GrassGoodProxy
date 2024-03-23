@@ -53,7 +53,8 @@ def main():
 
     with open(output_file, 'w') as outfile:
         for device in devices:
-            if device.get("is_proxy") is None:
+            #if device.get("is_proxy") is None:
+            if device.get("final_score", 0) != 0:
                 ip = device.get("device_ip")
                 ip_found = False
                 for ip_port in proxy_data.keys():
